@@ -1,0 +1,21 @@
+{% extends "testcases/templates/master.jinja2" %}
+
+{% set test_name = test_name | default("pre-merge-bt") %}
+{% set test_timeout = 30 %}
+
+{# Conditional tags based on device type #}
+{% if device_type == "iq-9075-evk" %}
+{% set TAGS = ["pvt"] %}
+{% endif %}
+
+{% block test_target %}
+  {{ super() }}
+    - from: git
+      name: "BT_FW_KMD_Service"
+      path: Runner/suites/Connectivity/Bluetooth/BT_FW_KMD_Service/BT_FW_KMD_Service.yaml
+      repository: {{ TEST_DEFINITIONS_REPOSITORY }}
+    - from: git
+      name: "BT_SCAN"
+      path: Runner/suites/Connectivity/Bluetooth/BT_SCAN/BT_SCAN.yaml
+      repository: {{ TEST_DEFINITIONS_REPOSITORY }}
+{% endblock test_target %}
