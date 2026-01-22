@@ -17,7 +17,6 @@ from pathlib import Path
 
 import jinja2
 
-
 BASE = Path(__file__).parent.resolve()
 
 
