@@ -10,7 +10,7 @@
 {% set BOOT_URL = "downloads://" + BOOT_IMG_FILE %}
 {% set ROOTFS_URL = "downloads://" + ROOTFS_IMG_FILE + ".img" %}
 {% set ROOTFS_URL_COMP = null %}
-{% set target_deploy_timeout = 15 %}
+{% set target_deploy_timeout = target_deploy_timeout|default(15) %}
 {% set use_download_headers = use_download_headers|default(false) %}
 
 {% block metadata %}
