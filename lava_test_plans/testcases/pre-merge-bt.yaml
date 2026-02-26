@@ -3,23 +3,42 @@
 {% set test_name = test_name | default("pre-merge-bt") %}
 {% set test_timeout = 30 %}
 
+{# Get excluded tests list from device file #}
+{% set EXCLUDED_TESTS = EXCLUDED_TESTS|default([]) %}
+
 {# Conditional tags based on device type #}
 {% if device_type == "iq-9075-evk" %}
 {% set TAGS = ["pvt"] %}
 {% endif %}
 
+{# Define all tests with their details and pre-evaluate conditions #}
+{% set all_tests = [
+    {"name": "BT_FW_KMD_Service", "path": "Runner/suites/Connectivity/Bluetooth/BT_FW_KMD_Service/BT_FW_KMD_Service.yaml", "expected": ["BT_FW_KMD_Service"]},
+    {"name": "BT_SCAN", "path": "Runner/suites/Connectivity/Bluetooth/BT_SCAN/BT_SCAN.yaml", "expected": ["BT_SCAN"]}
+] %}
+
+
 {% block test_target %}
   {{ super() }}
+    {% for test in all_tests %}
+    {# Check if test should be included (not excluded AND condition met if specified) #}
+    {% if (test.name not in EXCLUDED_TESTS) and (test.include|default(true)) %}
     - from: git
-      name: "BT_FW_KMD_Service"
-      path: Runner/suites/Connectivity/Bluetooth/BT_FW_KMD_Service/BT_FW_KMD_Service.yaml
+      name: "{{ test.name }}"
+      path: {{ test.path }}
       repository: {{ TEST_DEFINITIONS_REPOSITORY }}
+      {% if test.params is defined %}
+      params:
+        {% for param_key, param_value in test.params.items() %}
+        {{ param_key }}: "{{ param_value }}"
+        {% endfor %}
+      {% endif %}
+      {% if test.expected is defined and test.expected %}
       expected:
-        - "BT_FW_KMD_Service"
-    - from: git
-      name: "BT_SCAN"
-      path: Runner/suites/Connectivity/Bluetooth/BT_SCAN/BT_SCAN.yaml
-      repository: {{ TEST_DEFINITIONS_REPOSITORY }}
-      expected:
-        - "BT_SCAN"
+        {% for expected in test.expected|default([]) %}
+        - {{ expected }}
+        {% endfor %}
+      {% endif %}
+    {% endif %}
+    {% endfor %}
 {% endblock test_target %}
